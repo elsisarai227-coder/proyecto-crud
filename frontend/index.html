@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRUD de Usuarios</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input { margin: 5px; padding: 5px; }
+    button { padding: 5px 10px; cursor: pointer; }
+    table { border-collapse: collapse; margin-top: 20px; width: 60%; }
+    table, th, td { border: 1px solid #666; }
+    th, td { padding: 8px; }
+  </style>
+</head>
+<body>
+
+  <h2>CRUD de Usuarios - Cliente Web</h2>
+
+  <h3>Crear Usuario</h3>
+  <input id="nombre" placeholder="Nombre">
+  <input id="correo" placeholder="Correo">
+  <button onclick="crearUsuario()">Crear</button>
+
+  <h3>Lista de Usuarios</h3>
+  <button onclick="obtenerUsuarios()">Actualizar Lista</button>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Acciones</th></tr>
+    </thead>
+    <tbody id="tabla-usuarios"></tbody>
+  </table>
+
+  <script>
+    const API = "http://localhost/api/users";
+
+    async function obtenerUsuarios() {
+      const res = await fetch(API);
+      const data = await res.json();
+
+      const tabla = document.getElementById("tabla-usuarios");
+      tabla.innerHTML = "";
+
+      data.forEach(u => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.nombre}</td>
+            <td>${u.correo}</td>
+            <td>
+              <button onclick="eliminarUsuario(${u.id})">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    async function crearUsuario() {
+      const nombre = document.getElementById("nombre").value;
+      const correo = document.getElementById("correo").value;
+
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, correo })
+      });
+
+      obtenerUsuarios();
+    }
+
+    async function eliminarUsuario(id) {
+      await fetch(`${API}/${id}`, { method: "DELETE" });
+      obtenerUsuarios();
+    }
+
+    obtenerUsuarios();
+  </script>
+
+</body>
+</html>
